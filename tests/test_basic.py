@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 from tasks import (
     generate_unique_id,
     save_tasks,
@@ -11,7 +11,6 @@ from tasks import (
     filter_tasks_by_priority,
     get_overdue_tasks,
 )
-from app import main
 
 
 @pytest.mark.parametrize(
@@ -205,16 +204,14 @@ def test_get_overdue_tasks(tasks, expected, date):
 
 
 @patch("app.load_tasks", return_value=tasks)
-@patch("streamlit.button", return_value=True)
-@patch("streamlit.form_submit_button", return_value=True)
-@patch("streamlit.sidebar.button", return_value=True)
-@patch("streamlit.text_input", return_value="Hello World")
-def test_main(
-    mock_load_tasks,
-    mock_st_button,
-    mock_st_form_submit_button,
-    mock_run_basic_tests_button,
-    mock_st_text_input,
-):  # Run test as if all buttons pressed and all forms filled
-    # Note - main is a script that Streamlit uses to re-create the entire app any time any changes are made, updating the UI
-    main()
+@patch("app.save_tasks")
+@patch("app.subprocess.run")
+def test_main(mock_load_tasks, mock_save_tasks, mock_subprocess):
+    with patch("app.st") as mock_streamlit:
+        mock_streamlit.columns.return_value = [MagicMock(), MagicMock()]
+
+        from app import main  # Must be imported here for st module to mock correctly
+
+        # Run test as if all buttons pressed and all forms filled
+        # Note - main is a script that Streamlit uses to re-create the entire app any time any changes are made, updating the UI
+        main()

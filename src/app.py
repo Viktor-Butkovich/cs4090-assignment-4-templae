@@ -11,7 +11,6 @@ from tasks import (
 
 
 def main():
-    print("I AM RUNNING THIS APP")
     st.title("To-Do Application")
 
     # Load existing tasks
@@ -49,7 +48,17 @@ def main():
     if st.sidebar.button("Run Unit Tests"):
         with st.spinner("Running unit tests..."):
             result = subprocess.run(
-                ["python", "-m", "unittest", "discover", "-s", "tests"],
+                [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "--cov",
+                    "src",
+                    "--cov-report",
+                    "term-missing",
+                    "-s",
+                    "--cov-report=html",
+                ],
                 capture_output=True,
                 text=True,
             )
