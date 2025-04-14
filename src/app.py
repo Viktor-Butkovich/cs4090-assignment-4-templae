@@ -45,7 +45,7 @@ def main():
             save_tasks(tasks)
             st.sidebar.success("Task added successfully!")
 
-    if st.sidebar.button("Run Unit Tests"):
+    if st.sidebar.button("Run Unit Tests (All Functionality)"):
         with st.spinner("Running unit tests..."):
             result = subprocess.run(
                 [
@@ -58,6 +58,28 @@ def main():
                     "term-missing",
                     "-s",
                     "--cov-report=html",
+                ],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                st.sidebar.success("All tests passed!")
+            else:
+                st.sidebar.error("Some tests failed. Check the output below.")
+            st.sidebar.text_area("Test Output", result.stdout + result.stderr)
+
+    if st.sidebar.button("Run Unit Tests (pytest-cov)"):
+        with st.spinner("Running unit tests..."):
+            result = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "--cov",
+                    "src",
+                    "--cov-report",
+                    "term-missing",
+                    "-s",
                 ],
                 capture_output=True,
                 text=True,
