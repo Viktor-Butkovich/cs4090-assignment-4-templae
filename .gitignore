@@ -1,0 +1,7 @@
+assignment_description.md
+*.pyc
+.coverage
+*.bat
+*.docx
+tasks.json
+*.egg-info

@@ -4,6 +4,7 @@ from datetime import datetime
 from tasks import load_tasks, save_tasks, filter_tasks_by_priority, filter_tasks_by_category
 
 def main():
+    print("I AM RUNNING THIS APP")
     st.title("To-Do Application")
     
     # Load existing tasks
