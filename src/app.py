@@ -1,4 +1,5 @@
 import streamlit as st
+import subprocess
 import pandas as pd
 from datetime import datetime
 from tasks import (
@@ -44,6 +45,19 @@ def main():
             tasks.append(new_task)
             save_tasks(tasks)
             st.sidebar.success("Task added successfully!")
+
+    if st.sidebar.button("Run Unit Tests"):
+        with st.spinner("Running unit tests..."):
+            result = subprocess.run(
+                ["python", "-m", "unittest", "discover", "-s", "tests"],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                st.sidebar.success("All tests passed!")
+            else:
+                st.sidebar.error("Some tests failed. Check the output below.")
+            st.sidebar.text_area("Test Output", result.stdout + result.stderr)
 
     # Main area to display tasks
     st.header("Your Tasks")
