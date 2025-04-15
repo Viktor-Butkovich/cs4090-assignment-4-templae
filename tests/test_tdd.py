@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import io
 from unittest.mock import patch, MagicMock
-from tasks import delete_tasks, save_tasks, export_to_csv_bytes
+from tasks import delete_tasks, save_tasks, export_to_csv_bytes, get_num_pages, get_paginated_tasks
 
 
 @patch("os.remove")
@@ -94,3 +94,39 @@ def test_export_to_csv_bytes_output():
     bytes_df = pd.read_csv(csv_buffer)
     original_df = pd.DataFrame(tasks)
     assert bytes_df.equals(original_df)
+
+@pytest.mark.parametrize(
+    "tasks, tasks_per_page, expected",
+    [
+        ([], 0, 1),
+        ([], 1, 1),
+        (tasks, 1, 5),
+        (tasks, 2, 3),
+        (tasks, 3, 2),
+        (tasks, 5, 1),
+        (tasks, 6, 1)
+    ]
+)
+def test_get_num_pages(tasks, tasks_per_page, expected):
+    assert get_num_pages(tasks, tasks_per_page) == expected
+
+@pytest.mark.parametrize(
+    "current_page, filtered_tasks, tasks_per_page, expected",
+    [
+        (10, [], 1, []),
+        (1, tasks, 0, []),
+        (1, tasks, 1, [task1]),
+        (1, tasks, 2, [task1, task2]),
+        (1, tasks, 3, [task1, task2, task3]),
+        (1, tasks, 4, [task1, task2, task3, task4]),
+        (1, tasks, 5, [task1, task2, task3, task4, task5]),
+        (1, tasks, 6, [task1, task2, task3, task4, task5]),
+        (2, tasks, 1, [task2]),
+        (2, tasks, 2, [task3, task4]),
+        (2, tasks, 3, [task4, task5]),
+        (2, tasks, 4, [task5]),
+        (2, tasks, 5, []),
+    ]
+)
+def test_get_paginated_tasks(current_page, filtered_tasks, tasks_per_page, expected):
+    assert get_paginated_tasks(current_page, filtered_tasks, tasks_per_page) == expected
