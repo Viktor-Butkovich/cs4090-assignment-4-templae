@@ -1,6 +1,7 @@
 import json
 import os
 import io
+import math
 import pandas as pd
 from datetime import datetime
 
@@ -137,10 +138,25 @@ def get_overdue_tasks(tasks):
 
 
 def delete_tasks(file_path=DEFAULT_TASKS_FILE):
+    """
+    Deletes the inputted task file, if it exists.
+
+    Args:
+        file_path (str): Path to the JSON file to delete
+    """
     if os.path.exists(file_path):
         os.remove(file_path)
 
 def export_to_csv_bytes(tasks):
+    """
+    Exports the inputted tasks to a CSV bytes buffer
+
+    Args:
+        tasks (list): List of task dictionaries
+    
+    Returns:
+        bytes: CSV byte data
+    """
     df = pd.DataFrame(tasks) # Convert tasks to a dataframe
     
     # Create a BytesIO buffer to hold the CSV byte data
@@ -152,3 +168,32 @@ def export_to_csv_bytes(tasks):
     buffer.close()
     
     return csv_bytes
+
+def get_num_pages(tasks, tasks_per_page):
+    """
+    Calculate the number of pages needed to display tasks.
+
+    Args:
+        tasks (list): List of task dictionaries
+    
+    Returns:
+        int: Number of pages needed to display tasks
+    """
+    if tasks_per_page <= 0:
+        return 1
+    return max(math.ceil(len(tasks) / tasks_per_page), 1)
+
+def get_paginated_tasks(page_number, tasks, tasks_per_page):
+    """
+    Get a paginated list of tasks.
+    Args:
+        page_number (int): The current page number
+        tasks (list): List of task dictionaries
+        tasks_per_page (int): Number of tasks per page
+    
+    Returns:
+        list: A list of tasks for the current page
+    """
+    start_index = (page_number - 1) * tasks_per_page
+    end_index = start_index + tasks_per_page
+    return tasks[start_index:end_index]

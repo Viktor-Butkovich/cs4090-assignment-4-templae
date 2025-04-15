@@ -10,6 +10,8 @@ from tasks import (
     filter_tasks_by_category,
     delete_tasks,
     export_to_csv_bytes,
+    get_num_pages,
+    get_paginated_tasks,
 )
 
 
@@ -120,7 +122,12 @@ def main():
         filtered_tasks = [task for task in filtered_tasks if not task["completed"]]
 
     # Display tasks
-    for task in filtered_tasks:
+    tasks_per_page = 5
+    current_page = st.number_input(
+        "Page", min_value=1, max_value=get_num_pages(filtered_tasks, tasks_per_page), value=1, step=1, format="%d"
+    )
+    
+    for task in get_paginated_tasks(current_page, filtered_tasks, tasks_per_page):
         col1, col2 = st.columns([4, 1])
         with col1:
             if task["completed"]:
