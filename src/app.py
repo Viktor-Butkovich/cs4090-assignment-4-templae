@@ -7,6 +7,7 @@ from tasks import (
     save_tasks,
     filter_tasks_by_priority,
     filter_tasks_by_category,
+    delete_tasks,
 )
 
 
@@ -143,6 +144,9 @@ def main():
                 save_tasks(tasks)
                 st.rerun()
 
+    if st.button("Delete all tasks"):
+        delete_tasks()
+        st.rerun()
 
 if __name__ == "__main__":
     main()

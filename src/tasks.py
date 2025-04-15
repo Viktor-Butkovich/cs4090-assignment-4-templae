@@ -132,3 +132,8 @@ def get_overdue_tasks(tasks):
         for task in tasks
         if not task.get("completed", False) and task.get("due_date", "") < today
     ]
+
+
+def delete_tasks(file_path=DEFAULT_TASKS_FILE):
+    if os.path.exists(file_path):
+        os.remove(file_path)
