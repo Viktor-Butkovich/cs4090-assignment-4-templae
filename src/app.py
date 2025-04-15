@@ -4,10 +4,12 @@ import pandas as pd
 from datetime import datetime
 from tasks import (
     load_tasks,
+    generate_unique_id,
     save_tasks,
     filter_tasks_by_priority,
     filter_tasks_by_category,
     delete_tasks,
+    export_to_csv_bytes,
 )
 
 
@@ -33,7 +35,7 @@ def main():
 
         if submit_button and task_title:
             new_task = {
-                "id": len(tasks) + 1,
+                "id": generate_unique_id(tasks),
                 "title": task_title,
                 "description": task_description,
                 "priority": task_priority,
@@ -147,6 +149,13 @@ def main():
     if st.button("Delete all tasks"):
         delete_tasks()
         st.rerun()
+    
+    st.download_button(
+        label="Download CSV",
+        data=export_to_csv_bytes(tasks),
+        file_name="tasks.csv",
+        mime="text/csv",
+    )
 
 if __name__ == "__main__":
     main()

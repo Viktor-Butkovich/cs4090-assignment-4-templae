@@ -1,5 +1,7 @@
 import json
 import os
+import io
+import pandas as pd
 from datetime import datetime
 
 # File path for task storage
@@ -137,3 +139,16 @@ def get_overdue_tasks(tasks):
 def delete_tasks(file_path=DEFAULT_TASKS_FILE):
     if os.path.exists(file_path):
         os.remove(file_path)
+
+def export_to_csv_bytes(tasks):
+    df = pd.DataFrame(tasks) # Convert tasks to a dataframe
+    
+    # Create a BytesIO buffer to hold the CSV byte data
+    buffer = io.BytesIO()
+    df.to_csv(buffer, index=False, encoding='utf-8') # Write to the buffer as if it were a file
+
+    csv_bytes = buffer.getvalue()
+    
+    buffer.close()
+    
+    return csv_bytes
