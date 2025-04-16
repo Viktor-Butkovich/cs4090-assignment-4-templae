@@ -1,10 +1,9 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, mock_open, MagicMock
 from pytest_bdd import scenarios, given, when, then
-from datetime import datetime
-from app import add_task
+from app import add_task, save_tasks
 
-scenarios("../add_task.feature")
+scenarios("../task_management.feature")
 
 @pytest.fixture
 def context():
@@ -89,6 +88,26 @@ def action(context):
 @then("the task should be added to the task list")
 def outcome(context):
     assert context["result"] == context["expected"]
+
+
+@given("I have a task list")
+def precondition(context):
+    context["file_path"] = "mock_tasks.json"
+
+
+@when("I make any changes to the task list")
+def action(context):
+    with patch("builtins.open", mock_open()) as mocked_file:
+        with patch("json.dump") as mocked_json_dump:
+            save_tasks(context["tasks"], context["file_path"])
+            context["mocked_file"] = mocked_file
+            context["mocked_json_dump"] = mocked_json_dump
+
+
+@then("the task list should be saved")
+def outcome(context):
+    context["mocked_file"].assert_called_once_with(context["file_path"], "w")
+    context["mocked_json_dump"].assert_called_once_with(context["tasks"], context["mocked_file"](), indent=2)
 
 # The created at is incorrect
 # We need to modify the test tasks to have created_at, and we need to mock created_at to get the correct timestamp on the generated task
