@@ -3,5 +3,6 @@ assignment_description.md
 .coverage
 *.bat
 *.docx
+*.pdf
 tasks.json
 *.egg-info
