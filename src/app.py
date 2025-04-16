@@ -3,8 +3,8 @@ import subprocess
 import pandas as pd
 from datetime import datetime
 from tasks import (
+    add_task,
     load_tasks,
-    generate_unique_id,
     save_tasks,
     filter_tasks_by_priority,
     filter_tasks_by_category,
@@ -14,6 +14,16 @@ from tasks import (
     get_paginated_tasks,
 )
 
+
+def run_script(script):
+    return subprocess.run(script.split(), capture_output=True, text=True)
+
+def display_test_output(result):
+    if result.returncode == 0:
+        st.success("All tests passed!")
+    else:
+        st.error("Some tests failed. Check the output below.")
+    st.sidebar.text_area("Test Output", result.stdout + result.stderr)
 
 def main():
     st.title("To-Do Application")
@@ -36,64 +46,19 @@ def main():
         submit_button = st.form_submit_button("Add Task")
 
         if submit_button and task_title:
-            new_task = {
-                "id": generate_unique_id(tasks),
-                "title": task_title,
-                "description": task_description,
-                "priority": task_priority,
-                "category": task_category,
-                "due_date": task_due_date.strftime("%Y-%m-%d"),
-                "completed": False,
-                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            }
-            tasks.append(new_task)
+            tasks = add_task(tasks, task_title, task_description, task_priority, task_category, task_due_date.strftime("%Y-%m-%d"))
             save_tasks(tasks)
             st.sidebar.success("Task added successfully!")
 
-    if st.sidebar.button("Run Unit Tests (All Functionality)"):
-        with st.spinner("Running unit tests..."):
-            result = subprocess.run(
-                [
-                    "python",
-                    "-m",
-                    "pytest",
-                    "--cov",
-                    "src",
-                    "--cov-report",
-                    "term-missing",
-                    "-s",
-                    "--cov-report=html",
-                ],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0:
-                st.sidebar.success("All tests passed!")
-            else:
-                st.sidebar.error("Some tests failed. Check the output below.")
-            st.sidebar.text_area("Test Output", result.stdout + result.stderr)
-
-    if st.sidebar.button("Run Unit Tests (pytest-cov)"):
-        with st.spinner("Running unit tests..."):
-            result = subprocess.run(
-                [
-                    "python",
-                    "-m",
-                    "pytest",
-                    "--cov",
-                    "src",
-                    "--cov-report",
-                    "term-missing",
-                    "-s",
-                ],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0:
-                st.sidebar.success("All tests passed!")
-            else:
-                st.sidebar.error("Some tests failed. Check the output below.")
-            st.sidebar.text_area("Test Output", result.stdout + result.stderr)
+    for button_label, script in [
+        ("Run Unit Tests (All Functionality)", "python -m pytest --cov src --cov-report term-missing -s --cov-report=html"),
+        ("Run Unit Tests (pytest-cov)", "python -m pytest --cov src --cov-report term-missing -s"),
+        ("Run BDD Tests", "python -m pytest tests/feature/steps --cov-report term-missing -s --cov-report=html -vv"),
+    ]:
+        if st.sidebar.button(button_label):
+            with st.spinner(f"Running unit tests..."):
+                result = run_script(script)
+                display_test_output(result)
 
     # Main area to display tasks
     st.header("Your Tasks")

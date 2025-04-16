@@ -30,6 +30,19 @@ def load_tasks(file_path=DEFAULT_TASKS_FILE):
         return []
 
 
+def add_task(tasks, title, description, priority, category, due_date):
+    new_task = {
+        "id": generate_unique_id(tasks),
+        "title": title,
+        "description": description,
+        "priority": priority,
+        "category": category,
+        "due_date": due_date,
+        "completed": False,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    return tasks + [new_task]
+
 def save_tasks(tasks, file_path=DEFAULT_TASKS_FILE):
     """
     Save tasks to a JSON file.
