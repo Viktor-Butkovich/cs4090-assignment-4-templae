@@ -3,7 +3,13 @@ import os
 import pandas as pd
 import io
 from unittest.mock import patch, MagicMock
-from tasks import delete_tasks, save_tasks, export_to_csv_bytes, get_num_pages, get_paginated_tasks
+from src.tasks import (
+    delete_tasks,
+    save_tasks,
+    export_to_csv_bytes,
+    get_num_pages,
+    get_paginated_tasks,
+)
 
 
 @patch("os.remove")
@@ -15,6 +21,7 @@ def test_delete_tasks_calls_os_remove(mock_path_exists, mock_remove):
 
     mock_remove.assert_called_once_with(task_file)
 
+
 @patch("os.remove")
 @patch("os.path.exists", return_value=False)
 def test_delete_tasks_file_missing(mock_path_exists, mock_remove):
@@ -24,6 +31,7 @@ def test_delete_tasks_file_missing(mock_path_exists, mock_remove):
 
     mock_remove.assert_not_called()
 
+
 def test_delete_tasks_removes_file():
     task_file = "test_tasks.json"
     if os.path.exists(task_file):
@@ -32,6 +40,7 @@ def test_delete_tasks_removes_file():
     assert os.path.exists(task_file)
     delete_tasks(task_file)
     assert not os.path.exists(task_file)
+
 
 task1 = {
     "id": 1,
@@ -80,13 +89,15 @@ task5 = {
 }
 tasks = [task1, task2, task3, task4, task5]
 
+
 @patch("pandas.DataFrame", return_value=MagicMock())
 @patch("io.BytesIO", return_value=MagicMock())
 def test_export_to_csv_bytes_calls_to_csv(mock_bytes_io, mock_dataframe):
     export_to_csv_bytes(tasks)
     mock_dataframe.assert_called_once_with(tasks)
     mock_dataframe.return_value.to_csv.assert_called_once()
-    
+
+
 def test_export_to_csv_bytes_output():
     csv_bytes = export_to_csv_bytes(tasks)
     csv_buffer = io.BytesIO(csv_bytes)
@@ -94,6 +105,7 @@ def test_export_to_csv_bytes_output():
     bytes_df = pd.read_csv(csv_buffer)
     original_df = pd.DataFrame(tasks)
     assert bytes_df.equals(original_df)
+
 
 @pytest.mark.parametrize(
     "tasks, tasks_per_page, expected",
@@ -104,11 +116,12 @@ def test_export_to_csv_bytes_output():
         (tasks, 2, 3),
         (tasks, 3, 2),
         (tasks, 5, 1),
-        (tasks, 6, 1)
-    ]
+        (tasks, 6, 1),
+    ],
 )
 def test_get_num_pages(tasks, tasks_per_page, expected):
     assert get_num_pages(tasks, tasks_per_page) == expected
+
 
 @pytest.mark.parametrize(
     "current_page, filtered_tasks, tasks_per_page, expected",
@@ -126,7 +139,7 @@ def test_get_num_pages(tasks, tasks_per_page, expected):
         (2, tasks, 3, [task4, task5]),
         (2, tasks, 4, [task5]),
         (2, tasks, 5, []),
-    ]
+    ],
 )
 def test_get_paginated_tasks(current_page, filtered_tasks, tasks_per_page, expected):
     assert get_paginated_tasks(current_page, filtered_tasks, tasks_per_page) == expected

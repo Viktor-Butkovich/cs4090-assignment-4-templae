@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 from unittest.mock import patch, MagicMock
-from tasks import (
+from src.tasks import (
     generate_unique_id,
     filter_tasks_by_category,
     filter_tasks_by_completion,
@@ -136,7 +136,7 @@ def test_filter_tasks_by_priority(priority, expected):
     ],
 )
 def test_get_overdue_tasks(tasks, expected, date):
-    with patch("tasks.datetime") as mock_datetime:
+    with patch("src.tasks.datetime") as mock_datetime:
         # mock_datetime.datetime.now.return_value = datetime.strptime(date, "%Y-%m-%d")
         mock_datetime.now.return_value = datetime.strptime(date, "%Y-%m-%d")
         mock_datetime.strptime = datetime.strptime
@@ -144,11 +144,11 @@ def test_get_overdue_tasks(tasks, expected, date):
         assert get_overdue_tasks(tasks) == expected
 
 
-@patch("app.load_tasks", return_value=tasks)
-@patch("app.save_tasks")
-@patch("app.delete_tasks")
-@patch("app.subprocess.run")
-@patch("app.get_paginated_tasks", return_value=tasks)
+@patch("src.app.load_tasks", return_value=tasks)
+@patch("src.app.save_tasks")
+@patch("src.app.delete_tasks")
+@patch("src.app.subprocess.run")
+@patch("src.app.get_paginated_tasks", return_value=tasks)
 def test_main(
     mock_get_paginated_tasks,
     mock_subprocess,
@@ -156,10 +156,12 @@ def test_main(
     mock_save_tasks,
     mock_load_tasks,
 ):
-    with patch("app.st") as mock_streamlit:
+    with patch("src.app.st") as mock_streamlit:
         mock_streamlit.columns.return_value = [MagicMock(), MagicMock()]
 
-        from app import main  # Must be imported here for st module to mock correctly
+        from src.app import (
+            main,
+        )  # Must be imported here for st module to mock correctly
 
         # Run test as if all buttons pressed and all forms filled
         # Note - main is a script that Streamlit uses to re-create the entire app any time any changes are made, updating the UI
