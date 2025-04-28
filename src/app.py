@@ -2,6 +2,7 @@ import streamlit as st
 import subprocess
 import pandas as pd
 from datetime import datetime
+import sys
 from tasks import (
     add_task,
     load_tasks,
@@ -16,7 +17,10 @@ from tasks import (
 
 
 def run_script(script):
-    return subprocess.run(script.split(), capture_output=True, text=True)
+    return subprocess.run(
+        [sys.executable] + script.split()[1:], capture_output=True, text=True
+    )
+
 
 def display_test_output(result):
     if result.returncode == 0:
@@ -24,6 +28,7 @@ def display_test_output(result):
     else:
         st.error("Some tests failed. Check the output below.")
     st.sidebar.text_area("Test Output", result.stdout + result.stderr)
+
 
 def main():
     st.title("To-Do Application")
@@ -46,14 +51,30 @@ def main():
         submit_button = st.form_submit_button("Add Task")
 
         if submit_button and task_title:
-            tasks = add_task(tasks, task_title, task_description, task_priority, task_category, task_due_date.strftime("%Y-%m-%d"))
+            tasks = add_task(
+                tasks,
+                task_title,
+                task_description,
+                task_priority,
+                task_category,
+                task_due_date.strftime("%Y-%m-%d"),
+            )
             save_tasks(tasks)
             st.sidebar.success("Task added successfully!")
 
     for button_label, script in [
-        ("Run Unit Tests (All Functionality)", "python -m pytest --cov src --cov-report term-missing -s --cov-report=html"),
-        ("Run Unit Tests (pytest-cov)", "python -m pytest --cov src --cov-report term-missing -s"),
-        ("Run BDD Tests", "python -m pytest tests/feature/steps --cov-report term-missing -s --cov-report=html -vv"),
+        (
+            "Run Unit Tests (All Functionality)",
+            "python -m pytest --cov src --cov-report term-missing -s --cov-report=html",
+        ),
+        (
+            "Run Unit Tests (pytest-cov)",
+            "python -m pytest --cov src --cov-report term-missing -s",
+        ),
+        (
+            "Run BDD Tests",
+            "python -m pytest tests/feature/steps --cov-report term-missing -s --cov-report=html -vv",
+        ),
     ]:
         if st.sidebar.button(button_label):
             with st.spinner(f"Running unit tests..."):
@@ -89,9 +110,14 @@ def main():
     # Display tasks
     tasks_per_page = 5
     current_page = st.number_input(
-        "Page", min_value=1, max_value=get_num_pages(filtered_tasks, tasks_per_page), value=1, step=1, format="%d"
+        "Page",
+        min_value=1,
+        max_value=get_num_pages(filtered_tasks, tasks_per_page),
+        value=1,
+        step=1,
+        format="%d",
     )
-    
+
     for task in get_paginated_tasks(current_page, filtered_tasks, tasks_per_page):
         col1, col2 = st.columns([4, 1])
         with col1:
@@ -121,13 +147,14 @@ def main():
     if st.button("Delete all tasks"):
         delete_tasks()
         st.rerun()
-    
+
     st.download_button(
         label="Download CSV",
         data=export_to_csv_bytes(tasks),
         file_name="tasks.csv",
         mime="text/csv",
     )
+
 
 if __name__ == "__main__":
     main()

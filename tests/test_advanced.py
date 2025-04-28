@@ -149,7 +149,13 @@ def test_get_overdue_tasks(tasks, expected, date):
 @patch("app.delete_tasks")
 @patch("app.subprocess.run")
 @patch("app.get_paginated_tasks", return_value=tasks)
-def test_main(mock_get_paginated_tasks, mock_subprocess, mock_delete_tasks, mock_save_tasks, mock_load_tasks):
+def test_main(
+    mock_get_paginated_tasks,
+    mock_subprocess,
+    mock_delete_tasks,
+    mock_save_tasks,
+    mock_load_tasks,
+):
     with patch("app.st") as mock_streamlit:
         mock_streamlit.columns.return_value = [MagicMock(), MagicMock()]
 
