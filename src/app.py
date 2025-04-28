@@ -3,7 +3,7 @@ import subprocess
 import pandas as pd
 from datetime import datetime
 import sys
-from tasks import (
+from src.tasks import (
     add_task,
     load_tasks,
     save_tasks,

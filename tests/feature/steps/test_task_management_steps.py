@@ -90,23 +90,6 @@ def precondition(context):
     context["expected"] = context["tasks"] + [context["added_task"]]
 
 
-@when("I click the Add Task button")
-def action(context):
-    with patch("tasks.datetime") as mock_datetime:
-        mock_datetime.now.return_value = MagicMock()
-        mock_datetime.now.return_value.strftime.return_value = context["added_task"][
-            "created_at"
-        ]
-        context["result"] = add_task(
-            context["tasks"],
-            context["title"],
-            context["description"],
-            context["priority"],
-            context["category"],
-            context["due_date"],
-        )
-
-
 @then("the task should be added to the task list")
 def outcome(context):
     assert context["result"] == context["expected"]

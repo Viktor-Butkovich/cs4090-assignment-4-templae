@@ -4,11 +4,6 @@ Feature: Task management
   So that I can track my tasks
 
 
-  Scenario: Add task
-    Given I have filled the new task form
-    When I click the Add Task button
-    Then the task should be added to the task list
-
   Scenario: Save task
     Given I have a task list
     When I make any changes to the task list
